@@ -36,7 +36,7 @@
                 let multiplier = 1;
                 let ElementMenu = document.querySelectorAll(".ytp-menuitem")
                 for (let i = 0; i < ElementMenu.length; i++) {
-                    for (let j = 0; j < SpeenName.length; j++) {
+                    for (let j = 0; j < SpeedName.length; j++) {
                         if (ElementMenu[i].childNodes[1].innerText == SpeedName[j]) { 
                             if (ElementMenu[i].childNodes[2].innerText != "Normal") { multiplier = parseFloat(ElementMenu[i].childNodes[2].innerText); }
                         }
