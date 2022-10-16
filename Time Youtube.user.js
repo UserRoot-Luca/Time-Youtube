@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         Time Youtube
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  ###
 // @author       UserRoot-Luca
 // @match        https://www.youtube.com/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
+// @icon         https://www.google.com/s2/favicons?domain=youtube.com
 // @grant        none
 // @run-at       document-end
 // ==/UserScript==
@@ -13,6 +13,8 @@
     window.onload = function () {
         if (document.querySelector('.ytp-chrome-bottom')) {
             console.log("Start Time");
+
+            let SpeedName = ["Playback speed", "Velocità di riproduzione"];
 
             const TimeFormatting = (element) => {
                 let array = element.split(":");
@@ -34,9 +36,12 @@
                 let multiplier = 1;
                 let ElementMenu = document.querySelectorAll(".ytp-menuitem")
                 for (let i = 0; i < ElementMenu.length; i++) {
-                    if (ElementMenu[i].childNodes[1].innerText == "Playback speed") { 
-                        if (ElementMenu[i].childNodes[2].innerText != "Normal") { multiplier = parseFloat(ElementMenu[i].childNodes[2].innerText); }
+                    for (let j = 0; j < SpeenName.length; j++) {
+                        if (ElementMenu[i].childNodes[1].innerText == SpeedName[j]) { 
+                            if (ElementMenu[i].childNodes[2].innerText != "Normal") { multiplier = parseFloat(ElementMenu[i].childNodes[2].innerText); }
+                        }
                     }
+
                 }
                 if (multiplier >= 1) { dis /= multiplier; }
 
