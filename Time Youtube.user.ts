@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Time Youtube
 // @namespace    http://tampermonkey.net/
-// @version      2.1
+// @version      2.2
 // @description  ###
 // @author       UserRoot-Luca
 // @match        https://www.youtube.com/*
@@ -49,6 +49,7 @@
 
             let TimeString = "";
             let TimeStringBar = "";
+            let ClassBar = "";
             setInterval(() => {
                 let Duration = document.querySelector<HTMLElement>('.ytp-time-duration')!.innerText.split(" ")[0];
                 let TimeDuration = new Date("1970-01-01T" + TimeFormatting(Duration)).getTime();
@@ -70,6 +71,7 @@
                 let DurationBar = document.querySelector<HTMLSpanElement>(".ytp-tooltip-text")!.innerHTML.split(" ")[0];
                 let E_MyTimeBar = document.querySelector<HTMLSpanElement>("#MyTimeBar");
                 if (!E_MyTimeBar) {
+                    document.querySelector<HTMLSpanElement>(".ytp-tooltip-text")!.getAttribute('class')
                     let E_Time:HTMLSpanElement = document.createElement("span");
                     E_Time.id = "MyTimeBar"
                     E_Time.setAttribute("class", "ytp-tooltip-text ytp-tooltip-text-no-title");
@@ -89,9 +91,13 @@
                             E_MyTimeBar!.innerHTML = CurrentTimeBarString;
                         }
                     }
-                } else { E_MyTimeBar!.style.display = "none" }
+                } else if (E_MyTimeBar!.style.display != "none") { E_MyTimeBar!.style.display = "none" }
 
-
+                let CurrentClassBar = String(document.querySelector<HTMLSpanElement>(".ytp-tooltip-text")!.getAttribute('class'))
+                if (ClassBar != CurrentClassBar) {
+                    ClassBar = CurrentClassBar
+                    E_MyTimeBar!.setAttribute("class", CurrentClassBar);
+                }
                 let EditTime = TimeTransform(Dis);
                 let CurrentTimeString = Duration+" ( -"+EditTime.hours+":"+EditTime.minutes+":"+EditTime.seconds+ " )";
                 if (TimeString != CurrentTimeString) {

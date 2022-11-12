@@ -1,7 +1,8 @@
+"use strict";
 // ==UserScript==
 // @name         Time Youtube
 // @namespace    http://tampermonkey.net/
-// @version      2.1
+// @version      2.2
 // @description  ###
 // @author       UserRoot-Luca
 // @match        https://www.youtube.com/*
@@ -10,11 +11,11 @@
 // @run-at       document-end
 // ==/UserScript==
 (function () {
-    window.onload = function () {
+    window.onload = () => {
         if (document.querySelector('.ytp-chrome-bottom')) {
             console.log("Start Script");
-            var LangPag_1 = document.documentElement.lang;
-            var Elements_1 = {
+            let LangPag = document.documentElement.lang;
+            let Elements = {
                 "en": {
                     SpeedElementsName: "Playback speed",
                     NormalElementsName: "Normal"
@@ -24,20 +25,20 @@
                     NormalElementsName: "Normale"
                 }
             };
-            var TimeFormatting_1 = function (e) {
-                var array = e.split(":");
+            const TimeFormatting = (e) => {
+                let array = e.split(":");
                 if (array.length < 3) {
                     array.unshift("00");
                 }
-                array.forEach(function (s, i) { if (s.length < 2) {
+                array.forEach((s, i) => { if (s.length < 2) {
                     array[i] = '0' + s;
                 } });
                 return array.join(":");
             };
-            var TimeTransform_1 = function (n) {
-                var h = Math.floor((n % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                var m = Math.floor((n % (1000 * 60 * 60)) / (1000 * 60));
-                var s = Math.floor((n % (1000 * 60)) / 1000);
+            const TimeTransform = (n) => {
+                let h = Math.floor((n % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                let m = Math.floor((n % (1000 * 60 * 60)) / (1000 * 60));
+                let s = Math.floor((n % (1000 * 60)) / 1000);
                 if (h < 10) {
                     h = "0" + h;
                 }
@@ -53,19 +54,20 @@
                     seconds: String(s)
                 };
             };
-            var TimeString_1 = "";
-            var TimeStringBar_1 = "";
-            setInterval(function () {
-                var Duration = document.querySelector('.ytp-time-duration').innerText.split(" ")[0];
-                var TimeDuration = new Date("1970-01-01T" + TimeFormatting_1(Duration)).getTime();
-                var CurrentTime = new Date("1970-01-01T" + TimeFormatting_1(document.querySelector('.ytp-time-current').innerText)).getTime();
-                var Dis = TimeDuration - CurrentTime;
-                var Multiplier = 1;
-                var ElementMenu = document.querySelectorAll(".ytp-menuitem");
-                ElementMenu.forEach(function (e) {
+            let TimeString = "";
+            let TimeStringBar = "";
+            let ClassBar = "";
+            setInterval(() => {
+                let Duration = document.querySelector('.ytp-time-duration').innerText.split(" ")[0];
+                let TimeDuration = new Date("1970-01-01T" + TimeFormatting(Duration)).getTime();
+                let CurrentTime = new Date("1970-01-01T" + TimeFormatting(document.querySelector('.ytp-time-current').innerText)).getTime();
+                let Dis = TimeDuration - CurrentTime;
+                let Multiplier = 1;
+                let ElementMenu = document.querySelectorAll(".ytp-menuitem");
+                ElementMenu.forEach((e) => {
                     if (e.childNodes[1] != undefined) {
-                        if (e.childNodes[1].innerText == Elements_1[LangPag_1].SpeedElementsName) {
-                            if (e.childNodes[2].innerText != Elements_1[LangPag_1].NormalElementsName) {
+                        if (e.childNodes[1].innerText == Elements[LangPag].SpeedElementsName) {
+                            if (e.childNodes[2].innerText != Elements[LangPag].NormalElementsName) {
                                 Multiplier = parseFloat(e.childNodes[2].innerText);
                             }
                         }
@@ -74,38 +76,44 @@
                 if (Multiplier > 1) {
                     Dis /= Multiplier;
                 }
-                var DurationBar = document.querySelector(".ytp-tooltip-text").innerHTML.split(" ")[0];
-                var E_MyTimeBar = document.querySelector("#MyTimeBar");
+                let DurationBar = document.querySelector(".ytp-tooltip-text").innerHTML.split(" ")[0];
+                let E_MyTimeBar = document.querySelector("#MyTimeBar");
                 if (!E_MyTimeBar) {
-                    var E_Time = document.createElement("span");
+                    document.querySelector(".ytp-tooltip-text").getAttribute('class');
+                    let E_Time = document.createElement("span");
                     E_Time.id = "MyTimeBar";
                     E_Time.setAttribute("class", "ytp-tooltip-text ytp-tooltip-text-no-title");
                     E_Time.innerHTML = "";
                     document.querySelector(".ytp-tooltip-text-wrapper").appendChild(E_Time);
                 }
                 if (DurationBar.split(":").length > 1) {
-                    var CurrentTimeBar = new Date("1970-01-01T" + TimeFormatting_1(DurationBar)).getTime();
-                    var DisBar = CurrentTimeBar - CurrentTime;
+                    let CurrentTimeBar = new Date("1970-01-01T" + TimeFormatting(DurationBar)).getTime();
+                    let DisBar = CurrentTimeBar - CurrentTime;
                     if (DisBar > 0) {
                         if (Multiplier > 1) {
                             DisBar /= Multiplier;
                         }
-                        var EditTimeBar = TimeTransform_1(DisBar);
-                        var CurrentTimeBarString = "( -" + EditTimeBar.hours + ":" + EditTimeBar.minutes + ":" + EditTimeBar.seconds + " )";
-                        if (TimeStringBar_1 != CurrentTimeBarString) {
-                            TimeStringBar_1 = CurrentTimeBarString;
+                        let EditTimeBar = TimeTransform(DisBar);
+                        let CurrentTimeBarString = "( -" + EditTimeBar.hours + ":" + EditTimeBar.minutes + ":" + EditTimeBar.seconds + " )";
+                        if (TimeStringBar != CurrentTimeBarString) {
+                            TimeStringBar = CurrentTimeBarString;
                             E_MyTimeBar.style.display = "inline";
                             E_MyTimeBar.innerHTML = CurrentTimeBarString;
                         }
                     }
                 }
-                else {
+                else if (E_MyTimeBar.style.display != "none") {
                     E_MyTimeBar.style.display = "none";
                 }
-                var EditTime = TimeTransform_1(Dis);
-                var CurrentTimeString = Duration + " ( -" + EditTime.hours + ":" + EditTime.minutes + ":" + EditTime.seconds + " )";
-                if (TimeString_1 != CurrentTimeString) {
-                    TimeString_1 = CurrentTimeString;
+                let CurrentClassBar = String(document.querySelector(".ytp-tooltip-text").getAttribute('class'));
+                if (ClassBar != CurrentClassBar) {
+                    ClassBar = CurrentClassBar;
+                    E_MyTimeBar.setAttribute("class", CurrentClassBar);
+                }
+                let EditTime = TimeTransform(Dis);
+                let CurrentTimeString = Duration + " ( -" + EditTime.hours + ":" + EditTime.minutes + ":" + EditTime.seconds + " )";
+                if (TimeString != CurrentTimeString) {
+                    TimeString = CurrentTimeString;
                     document.querySelector('.ytp-time-duration').innerText = CurrentTimeString;
                 }
             }, 300);
