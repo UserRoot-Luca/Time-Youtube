@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         Time Youtube
 // @namespace    http://tampermonkey.net/
-// @version      2.2
+// @version      3.1
 // @description  ###
 // @author       UserRoot-Luca
 // @match        https://www.youtube.com/*
@@ -54,14 +54,7 @@
                     seconds: String(s)
                 };
             };
-            let TimeString = "";
-            let TimeStringBar = "";
-            let ClassBar = "";
-            setInterval(() => {
-                let Duration = document.querySelector('.ytp-time-duration').innerText.split(" ")[0];
-                let TimeDuration = new Date("1970-01-01T" + TimeFormatting(Duration)).getTime();
-                let CurrentTime = new Date("1970-01-01T" + TimeFormatting(document.querySelector('.ytp-time-current').innerText)).getTime();
-                let Dis = TimeDuration - CurrentTime;
+            const GetTimeMultiplier = (dis) => {
                 let Multiplier = 1;
                 let ElementMenu = document.querySelectorAll(".ytp-menuitem");
                 ElementMenu.forEach((e) => {
@@ -74,49 +67,43 @@
                     }
                 });
                 if (Multiplier > 1) {
-                    Dis /= Multiplier;
+                    return dis / Multiplier;
                 }
-                let DurationBar = document.querySelector(".ytp-tooltip-text").innerHTML.split(" ")[0];
+                return dis;
+            };
+            let CurrentTime = 0;
+            document.querySelector(".ytp-time-current").addEventListener("DOMSubtreeModified", (e) => {
+                let Duration = document.querySelector('.ytp-time-duration').innerText.split(" ")[0];
+                let TimeDuration = new Date("1970-01-01T" + TimeFormatting(Duration)).getTime();
+                CurrentTime = new Date("1970-01-01T" + TimeFormatting(e.target.innerText)).getTime();
+                let EditTime = TimeTransform(GetTimeMultiplier(TimeDuration - CurrentTime));
+                document.querySelector('.ytp-time-duration').innerText = Duration + " ( -" + EditTime.hours + ":" + EditTime.minutes + ":" + EditTime.seconds + " )";
+            });
+            document.querySelector(".ytp-tooltip-text").addEventListener("DOMSubtreeModified", (e) => {
+                let DurationBar = String(e.target.innerHTML.split(" ")[0]);
+                let E_Class = String(e.target.getAttribute('class'));
                 let E_MyTimeBar = document.querySelector("#MyTimeBar");
                 if (!E_MyTimeBar) {
-                    document.querySelector(".ytp-tooltip-text").getAttribute('class');
                     let E_Time = document.createElement("span");
                     E_Time.id = "MyTimeBar";
-                    E_Time.setAttribute("class", "ytp-tooltip-text ytp-tooltip-text-no-title");
-                    E_Time.innerHTML = "";
+                    E_Time.setAttribute("class", E_Class);
+                    E_Time.innerHTML = "( -00:00:00 )";
                     document.querySelector(".ytp-tooltip-text-wrapper").appendChild(E_Time);
                 }
                 if (DurationBar.split(":").length > 1) {
                     let CurrentTimeBar = new Date("1970-01-01T" + TimeFormatting(DurationBar)).getTime();
                     let DisBar = CurrentTimeBar - CurrentTime;
                     if (DisBar > 0) {
-                        if (Multiplier > 1) {
-                            DisBar /= Multiplier;
-                        }
-                        let EditTimeBar = TimeTransform(DisBar);
-                        let CurrentTimeBarString = "( -" + EditTimeBar.hours + ":" + EditTimeBar.minutes + ":" + EditTimeBar.seconds + " )";
-                        if (TimeStringBar != CurrentTimeBarString) {
-                            TimeStringBar = CurrentTimeBarString;
-                            E_MyTimeBar.style.display = "inline";
-                            E_MyTimeBar.innerHTML = CurrentTimeBarString;
-                        }
+                        let EditTimeBar = TimeTransform(GetTimeMultiplier(DisBar));
+                        E_MyTimeBar.style.display = "inline";
+                        E_MyTimeBar.innerHTML = "( -" + EditTimeBar.hours + ":" + EditTimeBar.minutes + ":" + EditTimeBar.seconds + " )";
                     }
                 }
                 else if (E_MyTimeBar.style.display != "none") {
                     E_MyTimeBar.style.display = "none";
                 }
-                let CurrentClassBar = String(document.querySelector(".ytp-tooltip-text").getAttribute('class'));
-                if (ClassBar != CurrentClassBar) {
-                    ClassBar = CurrentClassBar;
-                    E_MyTimeBar.setAttribute("class", CurrentClassBar);
-                }
-                let EditTime = TimeTransform(Dis);
-                let CurrentTimeString = Duration + " ( -" + EditTime.hours + ":" + EditTime.minutes + ":" + EditTime.seconds + " )";
-                if (TimeString != CurrentTimeString) {
-                    TimeString = CurrentTimeString;
-                    document.querySelector('.ytp-time-duration').innerText = CurrentTimeString;
-                }
-            }, 300);
+                E_MyTimeBar.setAttribute("class", E_Class);
+            });
             console.log("Loaded Script");
         }
     };
