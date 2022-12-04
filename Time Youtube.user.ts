@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Time Youtube
 // @namespace    http://tampermonkey.net/
-// @version      3.1
+// @version      4.1
 // @description  ###
 // @author       UserRoot-Luca
 // @match        https://www.youtube.com/*
@@ -66,7 +66,8 @@
                 let TimeDuration = new Date("1970-01-01T" + TimeFormatting(Duration)).getTime();
                 CurrentTime = new Date("1970-01-01T" + TimeFormatting(e.target.innerText)).getTime();
                 let EditTime = TimeTransform(GetTimeMultiplier(TimeDuration - CurrentTime));
-                document.querySelector<HTMLSpanElement>('.ytp-time-duration')!.innerText = Duration+" ( -"+EditTime.hours+":"+EditTime.minutes+":"+EditTime.seconds+ " )";
+                let EndTime = new Date((new Date().getTime() + GetTimeMultiplier(TimeDuration - CurrentTime)))
+                document.querySelector<HTMLSpanElement>('.ytp-time-duration')!.innerText = Duration+" ( -"+EditTime.hours+":"+EditTime.minutes+":"+EditTime.seconds+ " / "+ EndTime.getHours() + ":" + EndTime.getMinutes() + " )";
             });
 
             document.querySelector<HTMLSpanElement>(".ytp-tooltip-text")!.addEventListener("DOMSubtreeModified", (e: any)=>{
