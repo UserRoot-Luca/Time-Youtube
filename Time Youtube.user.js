@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         Time Youtube
 // @namespace    http://tampermonkey.net/
-// @version      4.1
+// @version      4.2
 // @description  ###
 // @author       UserRoot-Luca
 // @match        https://www.youtube.com/*
@@ -71,14 +71,33 @@
                 }
                 return dis;
             };
+            const OraFormatting = (e) => {
+                let h = e.getHours();
+                let m = e.getMinutes();
+                let s = e.getSeconds();
+                if (h < 10) {
+                    h = "0" + h;
+                }
+                if (m < 10) {
+                    m = "0" + m;
+                }
+                if (s < 10) {
+                    s = "0" + s;
+                }
+                return {
+                    hours: String(h),
+                    minutes: String(m),
+                    seconds: String(s)
+                };
+            };
             let CurrentTime = 0;
             document.querySelector(".ytp-time-current").addEventListener("DOMSubtreeModified", (e) => {
                 let Duration = document.querySelector('.ytp-time-duration').innerText.split(" ")[0];
                 let TimeDuration = new Date("1970-01-01T" + TimeFormatting(Duration)).getTime();
                 CurrentTime = new Date("1970-01-01T" + TimeFormatting(e.target.innerText)).getTime();
                 let EditTime = TimeTransform(GetTimeMultiplier(TimeDuration - CurrentTime));
-                let EndTime = new Date((new Date().getTime() + GetTimeMultiplier(TimeDuration - CurrentTime)));
-                document.querySelector('.ytp-time-duration').innerText = Duration + " ( -" + EditTime.hours + ":" + EditTime.minutes + ":" + EditTime.seconds + " / " + EndTime.getHours() + ":" + EndTime.getMinutes() + " )";
+                let EndTime = OraFormatting(new Date((new Date().getTime() + GetTimeMultiplier(TimeDuration - CurrentTime))));
+                document.querySelector('.ytp-time-duration').innerText = Duration + " ( -" + EditTime.hours + ":" + EditTime.minutes + ":" + EditTime.seconds + " / " + EndTime.hours + ":" + EndTime.minutes + " )";
             });
             document.querySelector(".ytp-tooltip-text").addEventListener("DOMSubtreeModified", (e) => {
                 let DurationBar = String(e.target.innerHTML.split(" ")[0]);

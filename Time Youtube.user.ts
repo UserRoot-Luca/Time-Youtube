@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Time Youtube
 // @namespace    http://tampermonkey.net/
-// @version      4.1
+// @version      4.2
 // @description  ###
 // @author       UserRoot-Luca
 // @match        https://www.youtube.com/*
@@ -59,6 +59,21 @@
                 if (Multiplier > 1) { return dis / Multiplier; }
                 return dis;
             }
+            const OraFormatting = (e: Date): {hours: String, minutes: String, seconds: String} => {
+                let h: number | string = e.getHours();
+                let m: number | string = e.getMinutes();
+                let s: number | string = e.getSeconds();
+                
+                if (h < 10) { h = "0" + h}
+                if (m < 10) { m = "0" + m}
+                if (s < 10) { s = "0" + s}
+                
+                return {
+                    hours: String(h),
+                    minutes: String(m),
+                    seconds: String(s)
+                };
+            }
 
             let CurrentTime = 0;
             document.querySelector<HTMLSpanElement>(".ytp-time-current")!.addEventListener("DOMSubtreeModified", (e: any)=>{
@@ -66,8 +81,8 @@
                 let TimeDuration = new Date("1970-01-01T" + TimeFormatting(Duration)).getTime();
                 CurrentTime = new Date("1970-01-01T" + TimeFormatting(e.target.innerText)).getTime();
                 let EditTime = TimeTransform(GetTimeMultiplier(TimeDuration - CurrentTime));
-                let EndTime = new Date((new Date().getTime() + GetTimeMultiplier(TimeDuration - CurrentTime)))
-                document.querySelector<HTMLSpanElement>('.ytp-time-duration')!.innerText = Duration+" ( -"+EditTime.hours+":"+EditTime.minutes+":"+EditTime.seconds+ " / "+ EndTime.getHours() + ":" + EndTime.getMinutes() + " )";
+                let EndTime = OraFormatting(new Date((new Date().getTime() + GetTimeMultiplier(TimeDuration - CurrentTime))))
+                document.querySelector<HTMLSpanElement>('.ytp-time-duration')!.innerText = Duration+" ( -"+EditTime.hours+":"+EditTime.minutes+":"+EditTime.seconds+ " / "+ EndTime.hours + ":" + EndTime.minutes + " )";
             });
 
             document.querySelector<HTMLSpanElement>(".ytp-tooltip-text")!.addEventListener("DOMSubtreeModified", (e: any)=>{
