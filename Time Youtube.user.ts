@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Time Youtube
 // @namespace    http://tampermonkey.net/
-// @version      4.2
+// @version      4.3
 // @description  ###
 // @author       UserRoot-Luca
 // @match        https://www.youtube.com/*
@@ -96,18 +96,18 @@
                     E_Time.setAttribute("class", E_Class);
                     E_Time.innerHTML="( -00:00:00 )";
                     document.querySelector<HTMLDivElement>(".ytp-tooltip-text-wrapper")!.appendChild(E_Time);
+                } else {
+                    if (DurationBar.split(":").length > 1) {
+                        let CurrentTimeBar = new Date("1970-01-01T" + TimeFormatting(DurationBar)).getTime()
+                        let DisBar = CurrentTimeBar - CurrentTime;
+                        if (DisBar > 0) {
+                            let EditTimeBar = TimeTransform(GetTimeMultiplier(DisBar));
+                            E_MyTimeBar!.style.display = "inline"
+                            E_MyTimeBar!.innerHTML = "( -"+EditTimeBar.hours+":"+EditTimeBar.minutes+":"+EditTimeBar.seconds+ " )";
+                        }
+                    } else if (E_MyTimeBar!.style.display != "none") { E_MyTimeBar!.style.display = "none" }
+                    E_MyTimeBar!.setAttribute("class", E_Class);
                 }
-                if (DurationBar.split(":").length > 1) {
-                    let CurrentTimeBar = new Date("1970-01-01T" + TimeFormatting(DurationBar)).getTime()
-                    let DisBar = CurrentTimeBar - CurrentTime;
-                    if (DisBar > 0) {
-                        let EditTimeBar = TimeTransform(GetTimeMultiplier(DisBar));
-                        E_MyTimeBar!.style.display = "inline"
-                        E_MyTimeBar!.innerHTML = "( -"+EditTimeBar.hours+":"+EditTimeBar.minutes+":"+EditTimeBar.seconds+ " )";
-                    }
-                } else if (E_MyTimeBar!.style.display != "none") { E_MyTimeBar!.style.display = "none" }
-
-                E_MyTimeBar!.setAttribute("class", E_Class);
             });
             console.log("Loaded Script");
         }
